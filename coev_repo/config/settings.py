@@ -313,8 +313,6 @@ class Local(Common):
         }
     }
 
-    ########## Your local stuff: Below this line define 3rd party libary settings
-
 
 class Production(Common):
 
@@ -346,37 +344,37 @@ class Production(Common):
     ALLOWED_HOSTS = ["*"]
     ########## END SITE CONFIGURATION
 
-    INSTALLED_APPS += ("gunicorn", )
+    #INSTALLED_APPS += ("gunicorn", )
 
     ########## STORAGE CONFIGURATION
     # See: http://django-storages.readthedocs.org/en/latest/index.html
-    INSTALLED_APPS += (
-        'storages',
-    )
+    #INSTALLED_APPS += (
+    #    'storages',
+    #)
 
     # See: http://django-storages.readthedocs.org/en/latest/backends/amazon-S3.html#settings
-    STATICFILES_STORAGE = DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    #STATICFILES_STORAGE = DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
     # See: http://django-storages.readthedocs.org/en/latest/backends/amazon-S3.html#settings
-    AWS_ACCESS_KEY_ID = values.SecretValue()
-    AWS_SECRET_ACCESS_KEY = values.SecretValue()
-    AWS_STORAGE_BUCKET_NAME = values.SecretValue()
-    AWS_AUTO_CREATE_BUCKET = True
-    AWS_QUERYSTRING_AUTH = False
+    #AWS_ACCESS_KEY_ID = values.SecretValue()
+    #AWS_SECRET_ACCESS_KEY = values.SecretValue()
+    #AWS_STORAGE_BUCKET_NAME = values.SecretValue()
+    #AWS_AUTO_CREATE_BUCKET = True
+    #AWS_QUERYSTRING_AUTH = False
 
     # see: https://github.com/antonagestam/collectfast
-    AWS_PRELOAD_METADATA = True
+    #AWS_PRELOAD_METADATA = True
     INSTALLED_APPS += ("collectfast", )
 
     # AWS cache settings, don't change unless you know what you're doing:
-    AWS_EXPIREY = 60 * 60 * 24 * 7
-    AWS_HEADERS = {
-        'Cache-Control': 'max-age=%d, s-maxage=%d, must-revalidate' % (AWS_EXPIREY,
-            AWS_EXPIREY)
-    }
+    #AWS_EXPIREY = 60 * 60 * 24 * 7
+    #AWS_HEADERS = {
+    #    'Cache-Control': 'max-age=%d, s-maxage=%d, must-revalidate' % (AWS_EXPIREY,
+    #        AWS_EXPIREY)
+    #}
 
     # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-url
-    STATIC_URL = 'https://s3.amazonaws.com/%s/' % AWS_STORAGE_BUCKET_NAME
+    #STATIC_URL = 'https://s3.amazonaws.com/%s/' % AWS_STORAGE_BUCKET_NAME
     ########## END STORAGE CONFIGURATION
 
     ########## EMAIL
@@ -404,12 +402,27 @@ class Production(Common):
 
     ########## CACHING
     # Only do this here because thanks to django-pylibmc-sasl and pylibmc memcacheify is painful to install on windows.
-    try:
+    #try:
         # See: https://github.com/rdegges/django-heroku-memcacheify
-        from memcacheify import memcacheify
-        CACHES = memcacheify()
-    except ImportError:
-        CACHES = values.CacheURLValue(default="memcached://127.0.0.1:11211")
+    #    from memcacheify import memcacheify
+    #    CACHES = memcacheify()
+    #except ImportError:
+    #    CACHES = values.CacheURLValue(default="memcached://127.0.0.1:11211")
     ########## END CACHING
 
-    ########## Your production stuff: Below this line define 3rd party libary settings
+    DB_ENGINE = 'django.db.backends.postgresql_psycopg2'
+    DB_NAME = os.environ['OPENSHIFT_APP_NAME']
+    DB_USER = os.environ['OPENSHIFT_POSTGRESQL_DB_USERNAME']
+    DB_PASSWORD = os.environ['OPENSHIFT_POSTGRESQL_DB_PASSWORD']
+    DB_HOST = os.environ['OPENSHIFT_POSTGRESQL_DB_HOST']
+    DB_PORT = os.environ['OPENSHIFT_POSTGRESQL_DB_PORT']
+    
+    DATABASES = {
+        'default': {
+            'ENGINE': DB_ENGINE,
+            'NAME': DB_NAME,
+            'USER': DB_USER,
+            'PASSWORD': DB_PASSWORD,
+            'HOST': DB_HOST,
+            'PORT': DB_PORT,
+        }
